@@ -74,22 +74,22 @@ bool CollisionDetection::RayBoxIntersection(const Ray& ray, const Vector3& boxPo
 }
 
 
-bool CollisionDetection::RayAABBIntersection(const Ray& r, const Transform& worldTransform, const AABBVolume& volume, RayCollision& collision) {
+bool CollisionDetection::RayAABBIntersection(const Ray& ray, const Transform& worldTransform, const AABBVolume& volume, RayCollision& collision) {
 	Vector3 boxPos = worldTransform.GetWorldPosition();
 	Vector3 boxSize = volume.GetHalfDimensions();
-	return RayBoxIntersection(r, boxPos, boxSize, collision);
+	return RayBoxIntersection(ray, boxPos, boxSize, collision);
 }
 
-bool CollisionDetection::RayOBBIntersection(const Ray& r, const Transform& worldTransform, const OBBVolume& volume, RayCollision& collision) {
+bool CollisionDetection::RayOBBIntersection(const Ray& ray, const Transform& worldTransform, const OBBVolume& volume, RayCollision& collision) {
 	Quaternion orientation = worldTransform.GetWorldOrientation();
 	Vector3 position = worldTransform.GetWorldPosition();
 
 	Matrix3 transform = orientation.ToMatrix3();
 	Matrix3 invTransform = orientation.Conjugate().ToMatrix3();
 
-	Vector3 localRayPos = r.GetPosition() - position;
+	Vector3 localRayPos = ray.GetPosition() - position;
 
-	Ray tempRay(invTransform * localRayPos, invTransform * r.GetDirection());
+	Ray tempRay(invTransform * localRayPos, invTransform * ray.GetDirection());
 
 	bool collided = RayBoxIntersection(tempRay, Vector3(),volume.GetHalfDimensions(), collision);
 

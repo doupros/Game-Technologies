@@ -203,8 +203,28 @@ This function will update both linear and angular acceleration,
 based on any forces that have been accumulated in the objects during
 the course of the previous game frame.
 */
-void PhysicsSystem::IntegrateAccel(float dt) {
+void PhysicsSystem::IntegrateAccel(float dt) {//整合加速度
+	std::vector <GameObject*>::const_iterator first;
+	std::vector <GameObject*>::const_iterator last;
 
+	for (auto i = first; i != last; ++i) {
+		PhysicsObject* object = (*i)->GetPhysicsObject();
+		if (object == nullptr) {
+			continue; // No physics object for this GameObject !
+		}
+		float inverseMass = object->GetInverseMass();//获取逆质量
+
+		Vector3 linearVel = object->GetLinearVelocity();
+		Vector3 force = object->GetForce();
+		Vector3 accel = force * inverseMass;//a=f*1/m
+
+		if (applyGravity && inverseMass > 0) {
+			accel += gravity; // don ’t move infinitely heavy things
+
+			linearVel += accel * dt; // integrate accel !
+			object->SetLinearVelocity(linearVel);
+		}
+	}
 }
 /*
 This function integrates linear and angular velocity into
@@ -212,8 +232,28 @@ position and orientation. It may be called multiple times
 throughout a physics update, to slowly move the objects through
 the world, looking for collisions.
 */
-void PhysicsSystem::IntegrateVelocity(float dt) {
+void PhysicsSystem::IntegrateVelocity(float dt) {//整合速度
+	std::vector < GameObject* >::const_iterator first;
+	std::vector < GameObject* >::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
+	float dampingFactor = 1.0f - 0.95f;//阻尼因子
+	float frameDamping = powf(dampingFactor, dt);//结构阻尼
 
+	for (auto i = first; i != last; ++i) {
+		PhysicsObject* object = (*i)->GetPhysicsObject();
+		if (object == nullptr) {
+			continue;
+		}
+		Transform& transform = (*i)->GetTransform();
+		// Position Stuff
+		Vector3 position = transform.GetLocalPosition();
+		Vector3 linearVel = object->GetLinearVelocity();
+		position += linearVel * dt;//模拟少量空气阻力 根据帧率减少
+		transform.SetLocalPosition(position);
+		// Linear Damping
+		linearVel = linearVel * frameDamping;//线速度=线速度*阻尼（少量减少）
+		object->SetLinearVelocity(linearVel);
+	}
 }
 
 /*
