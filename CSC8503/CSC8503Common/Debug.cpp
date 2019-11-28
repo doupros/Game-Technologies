@@ -42,4 +42,3 @@ void Debug::FlushRenderables() {
 
 	stringEntries.clear();
 	lineEntries.clear();
-}

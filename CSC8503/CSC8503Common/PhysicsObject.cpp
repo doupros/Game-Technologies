@@ -1,4 +1,4 @@
-#include "PhysicsObject.h"
+ï»¿#include "PhysicsObject.h"
 #include "PhysicsSystem.h"
 #include "../CSC8503Common/Transform.h"
 using namespace NCL;
@@ -29,14 +29,15 @@ void PhysicsObject::ApplyLinearImpulse(const Vector3& force) {
 }
 
 void PhysicsObject::AddForce(const Vector3& addedForce) {
-	force += addedForce;//Á¦µþ¼Ó
+	force += addedForce;//åŠ›å åŠ 
 }
 
 void PhysicsObject::AddForceAtPosition(const Vector3& addedForce, const Vector3& position) {
-	Vector3 localPos = position - transform->GetWorldPosition();
 
-	force  += addedForce;
-	torque += Vector3::Cross(localPos, addedForce);
+	Vector3 localPos = transform->GetWorldPosition() - position;
+
+	force += addedForce;// *PhysicsSystem::UNIT_MULTIPLIER;
+	torque += Vector3::Cross(addedForce, localPos);
 }
 
 void PhysicsObject::AddTorque(const Vector3& addedTorque) {
@@ -44,7 +45,7 @@ void PhysicsObject::AddTorque(const Vector3& addedTorque) {
 }
 
 void PhysicsObject::ClearForces() {
-	force				= Vector3();//Çå¿ÕÁ¦
+	force				= Vector3();//æ¸…ç©ºåŠ›
 	torque				= Vector3();
 }
 

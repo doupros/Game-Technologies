@@ -1,4 +1,4 @@
-#include "PhysicsSystem.h"
+ï»¿#include "PhysicsSystem.h"
 #include "PhysicsObject.h"
 #include "GameObject.h"
 #include "CollisionDetection.h"
@@ -197,33 +197,44 @@ void PhysicsSystem::NarrowPhase() {
 /*
 Integration of acceleration and velocity is split up, so that we can
 move objects multiple times during the course of a PhysicsUpdate,
-without worrying about repeated forces accumulating etc. 
+without worrying about repeated forces accumulating etc.
 
 This function will update both linear and angular acceleration,
 based on any forces that have been accumulated in the objects during
 the course of the previous game frame.
 */
-void PhysicsSystem::IntegrateAccel(float dt) {//ÕûºÏ¼ÓËÙ¶È
+void PhysicsSystem::IntegrateAccel(float dt) {//æ•´åˆåŠ é€Ÿåº¦
 	std::vector <GameObject*>::const_iterator first;
 	std::vector <GameObject*>::const_iterator last;
-
+	gameWorld.GetObjectIterators(first, last);
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject* object = (*i)->GetPhysicsObject();
 		if (object == nullptr) {
 			continue; // No physics object for this GameObject !
 		}
-		float inverseMass = object->GetInverseMass();//»ñÈ¡ÄæÖÊÁ¿
+		float inverseMass = object->GetInverseMass();//è´¨é‡çš„å€’æ•°
 
 		Vector3 linearVel = object->GetLinearVelocity();
 		Vector3 force = object->GetForce();
 		Vector3 accel = force * inverseMass;//a=f*1/m
 
 		if (applyGravity && inverseMass > 0) {
-			accel += gravity; // don ¡¯t move infinitely heavy things
-
-			linearVel += accel * dt; // integrate accel !
-			object->SetLinearVelocity(linearVel);
+			accel += gravity; // don't move infinitely heavy things
 		}
+		linearVel += accel * dt; // integrate accel !
+		object->SetLinearVelocity(linearVel);
+
+		// Angular stuff è§’é€Ÿåº¦ç›¸å…³
+		Vector3 torque = object -> GetTorque();//æ‰­åŠ›
+		Vector3 angVel = object -> GetAngularVelocity();//è§’é€Ÿåº¦
+
+		object -> UpdateInertiaTensor(); // update tensor vs orientation
+
+		Vector3 angAccel = object -> GetInertiaTensor()* torque;
+
+		angVel += angAccel * dt; // integrate angular accel ! æ•´åˆè§’åŠ é€Ÿåº¦
+		object -> SetAngularVelocity(angVel);
+
 	}
 }
 /*
@@ -232,12 +243,13 @@ position and orientation. It may be called multiple times
 throughout a physics update, to slowly move the objects through
 the world, looking for collisions.
 */
-void PhysicsSystem::IntegrateVelocity(float dt) {//ÕûºÏËÙ¶È
+void PhysicsSystem::IntegrateVelocity(float dt) {//æ•´åˆé€Ÿåº¦
 	std::vector < GameObject* >::const_iterator first;
 	std::vector < GameObject* >::const_iterator last;
 	gameWorld.GetObjectIterators(first, last);
-	float dampingFactor = 1.0f - 0.95f;//×èÄáÒò×Ó
-	float frameDamping = powf(dampingFactor, dt);//½á¹¹×èÄá
+
+	float dampingFactor = 1.0f - 0.95f;//é˜»å°¼å› å­
+	float frameDamping = powf(dampingFactor, dt);//ç»“æ„é˜»å°¼
 
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject* object = (*i)->GetPhysicsObject();
@@ -248,11 +260,24 @@ void PhysicsSystem::IntegrateVelocity(float dt) {//ÕûºÏËÙ¶È
 		// Position Stuff
 		Vector3 position = transform.GetLocalPosition();
 		Vector3 linearVel = object->GetLinearVelocity();
-		position += linearVel * dt;//Ä£ÄâÉÙÁ¿¿ÕÆø×èÁ¦ ¸ù¾İÖ¡ÂÊ¼õÉÙ
+		position += linearVel * dt;//æ¨¡æ‹Ÿå°‘é‡ç©ºæ°—é˜»åŠ› æ ¹æ®å¸§ç‡å‡å°‘
 		transform.SetLocalPosition(position);
 		// Linear Damping
-		linearVel = linearVel * frameDamping;//ÏßËÙ¶È=ÏßËÙ¶È*×èÄá£¨ÉÙÁ¿¼õÉÙ£©
+		linearVel = linearVel * frameDamping;//çº¿é€Ÿåº¦=çº¿é€Ÿåº¦*é˜»å°¼ï¼ˆå°‘é‡å‡å°‘ï¼‰
 		object->SetLinearVelocity(linearVel);
+
+		// Orientation Stuff
+		Quaternion orientation = transform.GetLocalOrientation();
+		Vector3 angVel = object->GetAngularVelocity();
+
+		orientation = orientation +(Quaternion(angVel * dt * 0.5f, 0.0f) * orientation);
+		orientation.Normalise();
+
+		transform.SetLocalOrientation(orientation);
+
+		// Damp the angular velocity too
+		angVel = angVel * frameDamping;
+		object->SetAngularVelocity(angVel);
 	}
 }
 

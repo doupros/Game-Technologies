@@ -77,7 +77,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 	if (useGravity) {
 		Debug::Print("(G)ravity on", Vector2(10, 40));
-		physics->SetGravity(Vector3(9, 9, 9));
+	//	physics->SetGravity(Vector3(9, 9, 9));
 	}
 	else {
 		Debug::Print("(G)ravity off", Vector2(10, 40));
@@ -291,21 +291,34 @@ void TutorialGame::MoveSelectedObject() {
 	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 100.0f;
 
 	if (!selectionObject) {
-		return;// we haven ’t selected anything !
+		return;// we haven乪t selected anything !
 	}
 	// Push the selected object !
 	if (Window::GetMouse()->ButtonPressed(NCL::MouseButtons::RIGHT)) {
-		//从鼠标射出去的激光检测
+		//
 		Ray ray = CollisionDetection::BuildRayFromMouse(*world->GetMainCamera());
 	
 		RayCollision closestCollision;
 		if (world->Raycast(ray, closestCollision, true)) {
 			if (closestCollision.node == selectionObject) {
-				selectionObject->GetPhysicsObject() ->AddForce(ray.GetDirection() * forceMagnitude);
+				//selectionObject->GetPhysicsObject() ->AddForce(ray.GetDirection() * forceMagnitude);
+				selectionObject->GetPhysicsObject()->
+					AddForceAtPosition(ray.GetDirection() * forceMagnitude,closestCollision.collidedAt);
 			}
 		}
 	}
+	if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::W)){
+	//	selectionObject->GetPhysicsObject()->AddForceAtPosition(forceMagnitude,)
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::S)) {
 
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::A)) {
+
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::D)) {
+
+	}
 }
 
 void TutorialGame::InitCamera() {

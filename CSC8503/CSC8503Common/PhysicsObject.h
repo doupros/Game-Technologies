@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "../../Common/Vector3.h"
 #include "../../Common/Matrix3.h"
 
@@ -72,20 +72,20 @@ namespace NCL {
 			const CollisionVolume* volume;
 			Transform*		transform;
 
-			float inverseMass;//ÄæÖÊÁ¿£¿Äæ»ı
-			float elasticity;//µ¯ĞÔ
-			float friction;//Ä¦²Á
+			float inverseMass;//è´¨é‡è´Ÿä¸€æ¬¡æ–¹
+			float elasticity;//å¼¹æ€§
+			float friction;//æ‘©æ“¦åŠ›
 
 			//linear stuff
-			Vector3 linearVelocity;//ÏßËÙ¶È
-			Vector3 force;//Á¦
+			Vector3 linearVelocity;//çº¿é€Ÿåº¦
+			Vector3 force;//åŠ›
 			
 
 			//angular stuff
-			Vector3 angularVelocity;//½ÇËÙ¶È
-			Vector3 torque;//Å¤Á¦
-			Vector3 inverseInertia;//Äæ ¹ßĞÔ
-			Matrix3 inverseInteriaTensor;//Äæ ¹ßĞÔÕÅÁ¿
+			Vector3 angularVelocity;//è§’é€Ÿåº¦
+			Vector3 torque;//æ‰­è½¬åŠ›
+			Vector3 inverseInertia;//åæƒ¯æ€§
+			Matrix3 inverseInteriaTensor;//åå‘æƒ¯æ€§å¼ é‡
 		};
 	}
 }
