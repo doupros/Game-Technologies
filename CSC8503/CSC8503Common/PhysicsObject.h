@@ -72,20 +72,20 @@ namespace NCL {
 			const CollisionVolume* volume;
 			Transform*		transform;
 
-			float inverseMass;
-			float elasticity;
-			float friction;
+			float inverseMass;//逆质量？逆积
+			float elasticity;//弹性
+			float friction;//摩擦
 
 			//linear stuff
-			Vector3 linearVelocity;
-			Vector3 force;
+			Vector3 linearVelocity;//线速度
+			Vector3 force;//力
 			
 
 			//angular stuff
-			Vector3 angularVelocity;
-			Vector3 torque;
-			Vector3 inverseInertia;
-			Matrix3 inverseInteriaTensor;
+			Vector3 angularVelocity;//角速度
+			Vector3 torque;//扭力
+			Vector3 inverseInertia;//逆 惯性
+			Matrix3 inverseInteriaTensor;//逆 惯性张量
 		};
 	}
 }

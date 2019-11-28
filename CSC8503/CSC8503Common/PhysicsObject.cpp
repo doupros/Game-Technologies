@@ -29,7 +29,7 @@ void PhysicsObject::ApplyLinearImpulse(const Vector3& force) {
 }
 
 void PhysicsObject::AddForce(const Vector3& addedForce) {
-	force += addedForce;
+	force += addedForce;//力叠加
 }
 
 void PhysicsObject::AddForceAtPosition(const Vector3& addedForce, const Vector3& position) {
@@ -44,7 +44,7 @@ void PhysicsObject::AddTorque(const Vector3& addedTorque) {
 }
 
 void PhysicsObject::ClearForces() {
-	force				= Vector3();
+	force				= Vector3();//清空力
 	torque				= Vector3();
 }
 
