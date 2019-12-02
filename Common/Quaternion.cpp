@@ -193,7 +193,7 @@ Quaternion Quaternion::AxisAngleToQuaterion(const Vector3& vector, float degrees
 }
 
 
-Vector3		Quaternion::operator *(const Vector3 &a)	const {
+/*Vector3		Quaternion::operator *(const Vector3 &a)	const {
 	Vector3 uv, uuv;
 	Vector3 qvec(x, y, z);
 	uv = -Vector3::Cross(a, qvec);
@@ -202,6 +202,10 @@ Vector3		Quaternion::operator *(const Vector3 &a)	const {
 	uuv *= 2.0f;
 
 	return a + (uv + uuv);
+}*/
+Vector3 Quaternion::operator *(const Vector3& a) const {
+	Quaternion newVec = *this * Quaternion(a.x, a.y, a.z, 0.0f) * Conjugate();
+	return Vector3(newVec.x, newVec.y, newVec.z);
 }
 
 Matrix3 Quaternion::ToMatrix3() const {
