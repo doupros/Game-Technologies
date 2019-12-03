@@ -36,7 +36,7 @@ void PhysicsObject::AddForceAtPosition(const Vector3& addedForce, const Vector3&
 
 	Vector3 localPos = transform->GetWorldPosition() - position;
 
-	force += addedForce;// *PhysicsSystem::UNIT_MULTIPLIER;
+	force += addedForce;/*PhysicsSystem::UNIT_MULTIPLIER;*/
 	torque += Vector3::Cross(addedForce, localPos);
 }
 
@@ -63,7 +63,7 @@ void PhysicsObject::InitCubeInertia() {
 
 void PhysicsObject::InitSphereInertia() {
 	float radius	= transform->GetLocalScale().GetMaxElement();
-	float i			= 2.5f * inverseMass / (radius*radius);
+	float i	 = 2.5f * inverseMass / (radius*radius);
 
 	inverseInertia	= Vector3(i, i, i);
 }
@@ -76,3 +76,4 @@ void PhysicsObject::UpdateInertiaTensor() {
 
 	inverseInteriaTensor = orientation * Matrix3::Scale(inverseInertia) *invOrientation;
 }
+

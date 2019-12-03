@@ -88,6 +88,26 @@ namespace NCL {
 
 			Vector3 broadphaseAABB;
 		};
+
+		struct ContactPoint {
+			Vector3 localA; // where did the collision occur ...
+			Vector3 localB; // in the frame of each object !
+			Vector3 normal;
+			float penetration;
+		};
+		struct CollisionInfo {
+			GameObject* a;
+			GameObject* b;
+
+			ContactPoint point;
+
+			void AddContactPoint(const Vector3& localA,const Vector3& localB, const Vector3& normal, float p) {
+				point.localA = localA;
+				point.localB = localB;
+				point.normal = normal;
+				point.penetration = p;
+			}
+		};
 	}
 }
 
