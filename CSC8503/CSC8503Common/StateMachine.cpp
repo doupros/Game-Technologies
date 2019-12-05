@@ -15,13 +15,28 @@ StateMachine::~StateMachine()
 }
 
 void StateMachine::AddState(State* s) {
-
+	allStates.emplace_back(s);
+	if (activeState == nullptr) {
+		activeState = s;
+	}
 }
 
 void StateMachine::AddTransition(StateTransition* t) {
-
+	allTransitions.insert(std::make_pair(t->GetSourceState(), t));
 }
 
-void StateMachine::Update() {
 
+void StateMachine::Update() {
+	if (activeState) {
+		activeState->Update();
+		// Get the transition set starting from this state node ;
+		std::pair < TransitionIterator, TransitionIterator > range = allTransitions.equal_range(activeState);
+		// Iterate through them all
+		for (auto& i = range.first; i != range.second; ++i) {
+			if (i->second->CanTransition()) { // some transition is true !
+				State* newState = i->second->GetDestinationState();
+				activeState = newState;
+			}
+		}
+	}
 }
