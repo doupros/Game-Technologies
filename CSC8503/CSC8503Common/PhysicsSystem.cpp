@@ -217,8 +217,8 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	transformA.SetWorldPosition(transformA.GetWorldPosition() -	(p.normal * p.penetration * (physA->GetInverseMass() / totalMass)));
 	transformB.SetWorldPosition(transformB.GetWorldPosition() + (p.normal * p.penetration * (physB->GetInverseMass() / totalMass)));
 
-	Vector3 relativeA = p.localA - transformA.GetWorldPosition();//相对向量
-	Vector3 relativeB = p.localB - transformB.GetWorldPosition();
+	Vector3 relativeA = p.localA;// -transformA.GetWorldPosition();//相对向量
+	Vector3 relativeB = p.localB;// -transformB.GetWorldPosition();
 
 	Vector3 angVelocityA =Vector3::Cross(physA->GetAngularVelocity(), relativeA);//叉乘物体中心指向碰撞点向量和角速度 得到A角速度
 	Vector3 angVelocityB =Vector3::Cross(physB->GetAngularVelocity(), relativeB);

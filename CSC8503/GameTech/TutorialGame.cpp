@@ -341,7 +341,7 @@ void TutorialGame::InitWorld() {
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
 	AddCharacterToWorld(Vector3(45, 2, 0));
 
-	AddFloorToWorld(Vector3(0, -2, 0));
+	AddFloorToWorld(Vector3(0, -4, 0));
 }
 
 //From here on it's functions to add in objects to the world!
@@ -358,7 +358,9 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	AABBVolume* volume = new AABBVolume(floorSize);
 	floor->SetBoundingVolume((CollisionVolume*)volume);
 	floor->GetTransform().SetWorldScale(floorSize);
-	floor->GetTransform().SetWorldPosition(position);
+	//floor->GetTransform().SetWorldPosition(position);
+	Vector3 tempPos = Vector3(position.x + floorSize.x, position.y, position.z + floorSize.z);
+	floor->GetTransform().SetWorldPosition(tempPos);
 
 	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
 	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
@@ -559,7 +561,7 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 			AddCubeToWorld(position, cubeDims, 1.0f);
 		}
 	}
-	AddFloorToWorld(Vector3(0, -2, 0));
+	AddFloorToWorld(Vector3(0, -3, 0));
 }
 
 void TutorialGame::BridgeConstraintTest() {
