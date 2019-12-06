@@ -30,6 +30,7 @@ namespace NCL {
 			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
 			void BridgeConstraintTest();
 			void SimpleGJKTest();
+			void InitGridMap();
 
 			bool SelectObject();
 			void MoveSelectedObject();

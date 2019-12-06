@@ -308,16 +308,18 @@ void TutorialGame::MoveSelectedObject() {
 		}
 	}
 	if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::W)){
-	//	selectionObject->GetPhysicsObject()->AddForceAtPosition(forceMagnitude,)
+		selectionObject->GetPhysicsObject()->AddForce(Vector3(forceMagnitude, 0, 0));
+		//->AddForceAtPosition(Vector3(0, 0,-forceMagnitude),Vector3(1,1,1));
+		//selectionObject->GetPhysicsObject()->SetLinearVelocity(Vector3(30, 0, 0));
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::S)) {
-
+		selectionObject->GetPhysicsObject()->AddForce(Vector3(-forceMagnitude, 0, 0));
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::A)) {
-
+		selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, -forceMagnitude));
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::D)) {
-
+		selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, forceMagnitude));
 	}
 }
 
@@ -333,15 +335,17 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-
-	InitMixedGridWorld(10, 10, 3.5f, 3.5f);
-	AddGooseToWorld(Vector3(30, 2, 0));
+	InitGridMap();
+	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
+	//AddGooseToWorld(Vector3(30, 2, 0));
+	AddGooseToWorld(Vector3(85, 2, 85));
 	AddAppleToWorld(Vector3(35, 2, 0));
 
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
 	AddCharacterToWorld(Vector3(45, 2, 0));
 
 	AddFloorToWorld(Vector3(0, -4, 0));
+
 }
 
 //From here on it's functions to add in objects to the world!
@@ -532,7 +536,7 @@ void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacin
 			AddSphereToWorld(position, radius, 1.0f);
 		}
 	}
-	AddFloorToWorld(Vector3(0, -2, 0));
+	//AddFloorToWorld(Vector3(0, -2, 0));
 }
 
 void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing) {
@@ -554,6 +558,25 @@ void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing
 	//AddFloorToWorld(Vector3(0, -2, 0));
 }
 
+void TutorialGame::InitGridMap() {
+	AddCubeToWorld(Vector3(10, -1, 10), Vector3(1, 1, 10), 0.0f);
+	AddSphereToWorld(Vector3(15, 0, 15),1,3.5f);
+	int xSize = 20; int zSize = 20; int tall = 2;
+	/*for (int x = 0; x < 10; x++)
+	{
+		for (int z = 0; z < 10; z++)
+		{
+			if ((x==0||x==9)||(z==0||z==9))
+			{
+				AddCubeToWorld(Vector3(x * 2+80, -1, z * 2+80), Vector3(1, 1, 1), 0);
+			}
+		}
+	}*/
+	
+	//AddCubeToWorld(Vector3(100, 0, 20), Vector3(xSize, tall, zSize), 0);
+
+}
+
 void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims) {
 	for (int x = 1; x < numCols+1; ++x) {
 		for (int z = 1; z < numRows+1; ++z) {
@@ -561,7 +584,7 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 			AddCubeToWorld(position, cubeDims, 1.0f);
 		}
 	}
-	AddFloorToWorld(Vector3(0, -3, 0));
+	//AddFloorToWorld(Vector3(0, -3, 0));
 }
 
 void TutorialGame::BridgeConstraintTest() {

@@ -36,7 +36,8 @@ NavigationGrid::NavigationGrid(const std::string&filename) : NavigationGrid() {
 			char type = 0;
 			infile >> type;
 			n.type = type;
-			n.position = Vector3((float)(x * gridWidth), 0, (float)(y * gridHeight));
+			//n.position = Vector3((float)(x * gridWidth), 0, (float)(y * gridHeight));
+			n.position = Vector3((float)(x * nodeSize), 0, (float)(y * nodeSize));
 		}
 	}
 	
@@ -153,8 +154,6 @@ bool NavigationGrid::NodeInList(GridNode* n, std::vector < GridNode* >& list) co
 	return i == list.end() ? false : true;
 
 }
-
-
 
 GridNode* NavigationGrid::RemoveBestNode(std::vector<GridNode*>& list) const {
 	std::vector < GridNode* >::iterator bestI = list.begin();
