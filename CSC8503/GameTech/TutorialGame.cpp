@@ -4,8 +4,12 @@
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Common/TextureLoader.h"
-
+#include "../CSC8503Common/NavigationGrid.h"
+#include <iostream>
+#include <fstream>
+#include "../../Common/Assets.h"
 #include "../CSC8503Common/PositionConstraint.h"
+
 
 using namespace NCL;
 using namespace CSC8503;
@@ -217,6 +221,21 @@ void TutorialGame::DebugObjectMovement() {
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM5)) {
 			selectionObject->GetPhysicsObject()->AddForce(Vector3(0, -10, 0));
 		}
+
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
+			selectionObject->GetPhysicsObject()->AddForce(selectionObject->GetTransform().GetLocalOrientation() * Vector3(0,0,10));
+		}	
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+			selectionObject->GetPhysicsObject()->AddForce(selectionObject->GetTransform().GetLocalOrientation() * Vector3(0, 0, -10));
+		}	
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+			selectionObject->GetPhysicsObject()->AddForce(Vector3(-10, 0, 0));
+			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, 10, 0));
+		}	
+		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+			selectionObject->GetPhysicsObject()->AddForce(Vector3(10, 0, 0));
+			selectionObject->GetPhysicsObject()->AddTorque(Vector3(0, -10, 0));
+		}
 	}
 }
 
@@ -307,7 +326,7 @@ void TutorialGame::MoveSelectedObject() {
 			}
 		}
 	}
-	if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::W)){
+	/*if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::W)){
 		selectionObject->GetPhysicsObject()->AddForce(Vector3(forceMagnitude, 0, 0));
 		//->AddForceAtPosition(Vector3(0, 0,-forceMagnitude),Vector3(1,1,1));
 		//selectionObject->GetPhysicsObject()->SetLinearVelocity(Vector3(30, 0, 0));
@@ -320,7 +339,7 @@ void TutorialGame::MoveSelectedObject() {
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::D)) {
 		selectionObject->GetPhysicsObject()->AddForce(Vector3(0, 0, forceMagnitude));
-	}
+	}*/
 }
 
 void TutorialGame::InitCamera() {
@@ -336,6 +355,7 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 	InitGridMap();
+	GenerateMap("MapFile20.txt");
 	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	//AddGooseToWorld(Vector3(30, 2, 0));
 	AddGooseToWorld(Vector3(85, 2, 85));
@@ -427,7 +447,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 
 GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
 {
-	float size			= 1.0f;
+	float size			= 2.0f;
 	float inverseMass	= 1.0f;
 
 	GameObject* goose = new GameObject();
@@ -629,3 +649,29 @@ void TutorialGame::SimpleGJKTest() {
 
 }
 
+void TutorialGame::GenerateMap(const std::string& filename) {
+	int nodeSize = 0;
+	int gridWidth = 0;
+	int gridHeight = 0;
+	//GridNode* allNodes = nullptr;
+
+	std::ifstream infile(Assets::DATADIR + filename);
+
+	infile >> nodeSize;
+	infile >> gridWidth;
+	infile >> gridHeight;
+
+	//allNodes = new GridNode[gridWidth * gridHeight];
+
+	for (int z = 0; z < gridHeight; z++){
+		for (int x = 0; x < gridWidth; x++){
+			char type;
+			infile >> type;
+			if (type == 120){
+				AddCubeToWorld(Vector3(x * 6+80, 1, z * 6+80), Vector3(3, 3, 3), 0);
+			}
+			else if (type == 46){}
+
+		}
+	}
+}

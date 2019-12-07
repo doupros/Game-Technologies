@@ -76,6 +76,7 @@ NavigationGrid::~NavigationGrid()	{
 	delete[] allNodes;
 }
 
+
 bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, NavigationPath& outPath) {
 	// need to work out which node Åffrom Åf sits in , and Åfto Åf sits in
 	int fromX = (from.x / nodeSize);
