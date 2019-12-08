@@ -355,10 +355,10 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 	InitGridMap();
-	GenerateMap("MapFile20.txt");
+	GenerateMap("TestGrid1.txt");
 	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	//AddGooseToWorld(Vector3(30, 2, 0));
-	AddGooseToWorld(Vector3(85, 2, 85));
+	AddGooseToWorld(Vector3(45, 2, 45));
 	AddAppleToWorld(Vector3(35, 2, 0));
 
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
@@ -662,15 +662,21 @@ void TutorialGame::GenerateMap(const std::string& filename) {
 	infile >> gridHeight;
 
 	//allNodes = new GridNode[gridWidth * gridHeight];
-
+	int count = 0;
 	for (int z = 0; z < gridHeight; z++){
 		for (int x = 0; x < gridWidth; x++){
 			char type;
 			infile >> type;
 			if (type == 120){
-				AddCubeToWorld(Vector3(x * 6+80, 1, z * 6+80), Vector3(3, 3, 3), 0);
+				AddCubeToWorld(Vector3(x * 6+40, 1, z * 6+40), Vector3(3, 3, 3), 0);
 			}
-			else if (type == 46){}
+			else if (type == 46&& count <= 25){
+				if (rand()%10==8)
+				{
+				AddAppleToWorld(Vector3(x * 6 + 40, 1, z * 6 + 40));
+				count++;
+				}
+			}
 
 		}
 	}
