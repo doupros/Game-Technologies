@@ -61,12 +61,12 @@ void TestNetworking() {
 vector<Vector3> testNodes;
 
 void TestPathfinding() {
-	NavigationGrid grid("TestGrid1.txt");
+	NavigationGrid grid("MapFile20.txt");
 	
 	NavigationPath outPath;
 
-	Vector3 startPos(80, 0, 10);
-	Vector3 endPos(80, 0, 80);
+	Vector3 startPos(45, 2, 45);
+	Vector3 endPos(160, 2, 160);
 
 	bool found = grid.FindPath(startPos, endPos, outPath);
 
@@ -133,15 +133,15 @@ int main() {
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 		
 		g->UpdateGame(dt);
-
+		
 		for (int ver = -100; ver < 100; ver += 4) {
 			Debug::DrawLine(Vector3(ver, 1, -100), Vector3(ver, 1, 100), Vector4(0, 1, 0, 1));
 		}
 		for (int ver = -100; ver < 100; ver += 4) {
-			Debug::DrawLine(Vector3(-100, 1, ver), Vector3(100, 1, ver), Vector4(1, 0, 0, 1));
+			Debug::DrawLine(Vector3(-100, 1, ver), Vector3(100, 1, ver), Vector4(0.5, 0, 0, 1));
 		}
-			Debug::DrawLine(Vector3(0, 0, 0), Vector3(0, 100, 0), Vector4(0, 0, 1, 1));
-
+			Debug::DrawLine(Vector3(0, 0, 0), Vector3(0, 100, 0), Vector4(0, 0, 0.5, 1));
+		
 	}
 	Window::DestroyGameWindow();
 }

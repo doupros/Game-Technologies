@@ -73,6 +73,8 @@ namespace NCL {
 
 			bool GetBroadphaseAABB(Vector3&outsize) const;
 
+			bool isWall; 
+
 			void UpdateBroadphaseAABB();
 
 		protected:

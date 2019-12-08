@@ -16,6 +16,7 @@ namespace NCL {
 		Vector3 GetHalfDimensions() const {
 			return halfSizes;
 		}
+		
 
 	protected:
 		Vector3 halfSizes;

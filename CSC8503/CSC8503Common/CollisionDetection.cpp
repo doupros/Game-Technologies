@@ -141,7 +141,11 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 
 	//比较两个object的类型
 	VolumeType pairType = (VolumeType)((int)volA->type | (int)volB->type);
-
+	if (a->isWall && b->isWall)
+	{
+		return false;
+	}
+	
 	if (pairType == VolumeType::AABB) {
 		return AABBIntersection((AABBVolume&)*volA, transformA,
 			(AABBVolume&)*volB, transformB, collisionInfo);
@@ -162,6 +166,7 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 		return AABBSphereIntersection((AABBVolume&)*volB, transformB,
 			(SphereVolume&)*volA, transformA, collisionInfo);
 	}
+
 
 	return false;
 

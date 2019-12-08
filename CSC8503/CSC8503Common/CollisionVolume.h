@@ -18,5 +18,6 @@ namespace NCL {
 		~CollisionVolume() {}
 
 		VolumeType type;
+		
 	};
 }

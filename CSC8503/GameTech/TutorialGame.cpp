@@ -265,7 +265,9 @@ bool TutorialGame::SelectObject() {
 		if (Window::GetMouse()->ButtonDown(NCL::MouseButtons::LEFT)) {
 			if (selectionObject) {	//set colour to deselected;
 				selectionObject->GetRenderObject()->SetColour(Vector4(1, 1, 1, 1));
+				selectionObject->isWall ? Debug::Print("is Wall", Vector2(10, 60)) : Debug::Print("is not Wall", Vector2(10, 60));
 				selectionObject = nullptr;
+
 			}
 
 			Ray ray = CollisionDetection::BuildRayFromMouse(*world->GetMainCamera());
@@ -354,8 +356,8 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-	InitGridMap();
-	GenerateMap("TestGrid1.txt");
+	//InitGridMap();
+	GenerateMap("MapFile20.txt");
 	//InitMixedGridWorld(10, 10, 3.5f, 3.5f);
 	//AddGooseToWorld(Vector3(30, 2, 0));
 	AddGooseToWorld(Vector3(45, 2, 45));
@@ -377,7 +379,7 @@ A single function to add a large immoveable cube to the bottom of our world
 */
 GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	GameObject* floor = new GameObject();
-
+	floor->isWall = true;
 	Vector3 floorSize = Vector3(100, 2, 100);
 	AABBVolume* volume = new AABBVolume(floorSize);
 	floor->SetBoundingVolume((CollisionVolume*)volume);
@@ -424,13 +426,12 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 	return sphere;
 }
 
-GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass) {
+GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass, bool wall) {
 	GameObject* cube = new GameObject();
-
+	cube->isWall = wall;
 	AABBVolume* volume = new AABBVolume(dimensions);
-
 	cube->SetBoundingVolume((CollisionVolume*)volume);
-
+	
 	cube->GetTransform().SetWorldPosition(position);
 	cube->GetTransform().SetWorldScale(dimensions);
 
@@ -537,7 +538,7 @@ GameObject* TutorialGame::AddAppleToWorld(const Vector3& position) {
 	apple->SetBoundingVolume((CollisionVolume*)volume);
 	apple->GetTransform().SetWorldScale(Vector3(4, 4, 4));
 	apple->GetTransform().SetWorldPosition(position);
-
+	
 	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), appleMesh, nullptr, basicShader));
 	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
 
@@ -656,7 +657,10 @@ void TutorialGame::GenerateMap(const std::string& filename) {
 	//GridNode* allNodes = nullptr;
 
 	std::ifstream infile(Assets::DATADIR + filename);
+	if (infile.is_open())
+	{
 
+	}
 	infile >> nodeSize;
 	infile >> gridWidth;
 	infile >> gridHeight;
@@ -668,7 +672,7 @@ void TutorialGame::GenerateMap(const std::string& filename) {
 			char type;
 			infile >> type;
 			if (type == 120){
-				AddCubeToWorld(Vector3(x * 6+40, 1, z * 6+40), Vector3(3, 3, 3), 0);
+				AddCubeToWorld(Vector3(x * 6+40, 1, z * 6+40), Vector3(3, 3, 3), 0,true);
 			}
 			else if (type == 46&& count <= 25){
 				if (rand()%10==8)
