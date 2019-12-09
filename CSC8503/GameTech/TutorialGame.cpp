@@ -11,8 +11,12 @@
 #include "../CSC8503Common/PositionConstraint.h"
 
 
+
 using namespace NCL;
 using namespace CSC8503;
+
+
+
 
 TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
@@ -23,6 +27,7 @@ TutorialGame::TutorialGame()	{
 	useGravity		= false;
 	inSelectionMode = false;
 
+	grid = new NavigationGrid("MapFile20.txt");
 	Debug::SetRenderer(renderer);
 
 	InitialiseAssets();
@@ -165,6 +170,26 @@ void TutorialGame::LockedObjectMovement() {
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::DOWN)) {
 		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis);
 	}
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W))
+	{
+		selectionObject->GetPhysicsObject()->AddForce(fwdAxis * forceMagnitude);
+	}
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A))
+	{
+		selectionObject->GetPhysicsObject()->AddForce(-rightAxis * forceMagnitude);
+	}
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S))
+	{
+		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis * forceMagnitude);
+	}
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D))
+	{
+		selectionObject->GetPhysicsObject()->AddForce(rightAxis * forceMagnitude);
+	}
 }
 
 void  TutorialGame::LockedCameraMovement() {
@@ -223,10 +248,10 @@ void TutorialGame::DebugObjectMovement() {
 		}
 
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
-			selectionObject->GetPhysicsObject()->AddForce(selectionObject->GetTransform().GetLocalOrientation() * Vector3(0,0,10));
+			selectionObject->GetPhysicsObject()->AddForce(selectionObject->GetTransform().GetLocalOrientation() * Vector3(0,0,20));
 		}	
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
-			selectionObject->GetPhysicsObject()->AddForce(selectionObject->GetTransform().GetLocalOrientation() * Vector3(0, 0, -10));
+			selectionObject->GetPhysicsObject()->AddForce(selectionObject->GetTransform().GetLocalOrientation() * Vector3(0, 0, -20));
 		}	
 		if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
 			selectionObject->GetPhysicsObject()->AddForce(Vector3(-10, 0, 0));
@@ -267,7 +292,6 @@ bool TutorialGame::SelectObject() {
 				selectionObject->GetRenderObject()->SetColour(Vector4(1, 1, 1, 1));
 				selectionObject->isWall ? Debug::Print("is Wall", Vector2(10, 60)) : Debug::Print("is not Wall", Vector2(10, 60));
 				selectionObject = nullptr;
-
 			}
 
 			Ray ray = CollisionDetection::BuildRayFromMouse(*world->GetMainCamera());
@@ -362,9 +386,9 @@ void TutorialGame::InitWorld() {
 	//AddGooseToWorld(Vector3(30, 2, 0));
 	AddGooseToWorld(Vector3(45, 2, 45));
 	AddAppleToWorld(Vector3(35, 2, 0));
-
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
 	AddCharacterToWorld(Vector3(45, 2, 0));
+	GoosePathFinding();
 
 	AddFloorToWorld(Vector3(0, -4, 0));
 
@@ -389,6 +413,7 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	floor->GetTransform().SetWorldPosition(tempPos);
 
 	floor->SetRenderObject(new RenderObject(&floor->GetTransform(), cubeMesh, basicTex, basicShader));
+	floor->GetRenderObject()->SetColour(Vector4(0, 0, 0, 1));
 	floor->SetPhysicsObject(new PhysicsObject(&floor->GetTransform(), floor->GetBoundingVolume()));
 
 	floor->GetPhysicsObject()->SetInverseMass(0);
@@ -436,6 +461,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	cube->GetTransform().SetWorldScale(dimensions);
 
 	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->GetRenderObject()->SetColour(Vector4(1, 0.9, 0.8, 1));
 	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
 
 	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
@@ -451,9 +477,8 @@ GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
 	float size			= 2.0f;
 	float inverseMass	= 1.0f;
 
-	GameObject* goose = new GameObject();
-
-
+	GameObject* goose = new GameObject("goose");
+	
 	SphereVolume* volume = new SphereVolume(size);
 	goose->SetBoundingVolume((CollisionVolume*)volume);
 
@@ -532,14 +557,14 @@ GameObject* TutorialGame::AddCharacterToWorld(const Vector3& position) {
 }
 
 GameObject* TutorialGame::AddAppleToWorld(const Vector3& position) {
-	GameObject* apple = new GameObject();
+	GameObject* apple = new GameObject("apple");
 
 	SphereVolume* volume = new SphereVolume(0.7f);
 	apple->SetBoundingVolume((CollisionVolume*)volume);
 	apple->GetTransform().SetWorldScale(Vector3(4, 4, 4));
 	apple->GetTransform().SetWorldPosition(position);
-	
 	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), appleMesh, nullptr, basicShader));
+	apple->GetRenderObject()->SetColour(Vector4(0, 1, 1, 1));
 	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
 
 	apple->GetPhysicsObject()->SetInverseMass(1.0f);
@@ -675,8 +700,7 @@ void TutorialGame::GenerateMap(const std::string& filename) {
 				AddCubeToWorld(Vector3(x * 6+40, 1, z * 6+40), Vector3(3, 3, 3), 0,true);
 			}
 			else if (type == 46&& count <= 25){
-				if (rand()%10==8)
-				{
+				if (rand()%10==8){
 				AddAppleToWorld(Vector3(x * 6 + 40, 1, z * 6 + 40));
 				count++;
 				}
@@ -684,4 +708,28 @@ void TutorialGame::GenerateMap(const std::string& filename) {
 
 		}
 	}
+}
+
+void TutorialGame::GoosePathFinding() {
+	vector<Vector3> mapNodes;
+	if (selectionObject)
+	{
+		NavigationPath outPath;
+		Vector3 startPos = selectionObject->GetTransform().GetWorldPosition();
+		Vector3 endPos(160 ,2 ,160);
+
+		bool found = grid->FindPath(startPos, endPos, outPath);
+		Vector3 pos;
+		while (outPath.PopWaypoint(pos)) {
+			mapNodes.push_back(pos);
+		}
+		for (int i = 1; i < mapNodes.size(); ++i) {
+			Vector3 a = mapNodes[i - 1];
+			a.x += startPos.y;
+			Vector3 b = mapNodes[i];
+
+			Debug::DrawLine(a, b, Vector4(0, 1, 0, 1));
+		}
+	}
+	
 }

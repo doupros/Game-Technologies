@@ -1,6 +1,7 @@
 #pragma once
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
+#include "../CSC8503Common/NavigationGrid.h"
 
 
 namespace NCL {
@@ -38,6 +39,7 @@ namespace NCL {
 			void LockedObjectMovement();
 			void LockedCameraMovement();
 			void GenerateMap(const std::string& filename);
+			void GoosePathFinding();
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
@@ -48,7 +50,7 @@ namespace NCL {
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 
-
+			NavigationGrid* grid = nullptr;
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
 			GameWorld*			world;
