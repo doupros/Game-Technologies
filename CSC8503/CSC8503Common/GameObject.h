@@ -74,6 +74,9 @@ namespace NCL {
 			bool GetBroadphaseAABB(Vector3&outsize) const;
 
 			bool isWall; 
+			bool isSpown;
+			bool isWater;
+			int appleState = 0;
 
 			void UpdateBroadphaseAABB();
 

@@ -115,8 +115,8 @@ void TestPathfinding() {
 	
 	NavigationPath outPath;
 
-	Vector3 startPos(5, 2, 5);
-	Vector3 endPos(80, 2, 80);
+	Vector3 startPos(6, 6, 6);
+	Vector3 endPos(120, 6, 120);
 
 	bool found = grid.FindPath(startPos, endPos, outPath);
 
@@ -129,8 +129,10 @@ void DisplayPathfinding() {
 	for (int i = 1; i < testNodes.size(); ++i) {
 		Vector3 a = testNodes[i - 1];
 		Vector3 b = testNodes[i];
-
-		Debug::DrawLine(a, b, Vector4(0, 1, 0, 1));
+		//std::cout <<"A:"<< a.x << a.y << a.z << std::endl;
+		//std::cout <<"B:"<< b.x << b.y << b.z << std::endl;
+		//Debug::DrawLine(a, b, Vector4(0, 1, 0, 1));
+		Debug::DrawLine(Vector3(a.x+6,a.y,a.z+6), Vector3(b.x + 6, b.y, b.z + 6), Vector4(0, 1, 0, 1));
 	}
 }
 
@@ -157,7 +159,7 @@ int main() {
 
 	TestStateMachine();
 	//TestNetworking();
-	TestPathfinding();
+	//TestPathfinding();
 	
 	w->ShowOSPointer(false);
 	w->LockMouseToWindow(true);
@@ -178,20 +180,20 @@ int main() {
 			w->ShowConsole(false);
 		}
 
-		DisplayPathfinding();
+		//DisplayPathfinding();
 
 		w->SetTitle("Gametech frame time:" + std::to_string(1000 / (1000.0f * dt)));
 		
 		g->UpdateGame(dt);
 		
-		for (int ver = -100; ver < 100; ver += 4) {
+		/*for (int ver = -100; ver < 100; ver += 4) {
 			Debug::DrawLine(Vector3(ver, 1, -100), Vector3(ver, 1, 100), Vector4(0, 1, 0, 1));
 		}
 		for (int ver = -100; ver < 100; ver += 4) {
 			Debug::DrawLine(Vector3(-100, 1, ver), Vector3(100, 1, ver), Vector4(0.5, 0, 0, 1));
 		}
 			Debug::DrawLine(Vector3(0, 0, 0), Vector3(0, 100, 0), Vector4(0, 0, 0.5, 1));
-		
+		*/
 	}
 	Window::DestroyGameWindow();
 }

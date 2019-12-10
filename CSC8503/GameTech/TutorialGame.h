@@ -40,22 +40,28 @@ namespace NCL {
 			void LockedCameraMovement();
 			void GenerateMap(const std::string& filename);
 			void GoosePathFinding();
+			void DrawBaseLine();
+			void ChangeObjDir();
+			void GrabApple();
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f,bool wall = 0);
-			GameObject* AddWaterCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass=1, bool wall=0);
+			GameObject* AddWaterCubeToWorld(const Vector3& position, bool isWater = 1);
+			GameObject* AddSpawnToWorld(const Vector3& position);
 			//IT'S HAPPENING
 			GameObject* AddGooseToWorld(const Vector3& position);
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
+			vector<GameObject*> apple;
 
 			NavigationGrid* grid = nullptr;
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
 			GameWorld*			world;
 
+			int score=0;
 			bool useGravity;
 			bool inSelectionMode;
 
@@ -76,6 +82,8 @@ namespace NCL {
 			OGLMesh*	charB		= nullptr;
 
 			//Coursework Additional functionality	
+			GameObject* spawn;
+			GameObject* goose;
 			GameObject* lockedObject	= nullptr;
 			Vector3 lockedOffset		= Vector3(0, 14, 20);
 			void LockCameraToObject(GameObject* o) {
