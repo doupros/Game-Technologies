@@ -123,6 +123,9 @@
     <ClInclude Include="Debug.h">
       <Filter>Other</Filter>
     </ClInclude>
+    <ClInclude Include="WATERVolume.h">
+      <Filter>CollisionDetection</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetection.cpp">

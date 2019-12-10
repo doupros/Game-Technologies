@@ -166,6 +166,7 @@
     <ClInclude Include="StateMachine.h" />
     <ClInclude Include="StateTransition.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="WATERVolume.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoundingAABB.cpp" />

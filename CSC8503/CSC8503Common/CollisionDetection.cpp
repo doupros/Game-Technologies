@@ -2,6 +2,7 @@
 #include "CollisionVolume.h"
 #include "AABBVolume.h"
 #include "OBBVolume.h"
+#include "WATERVolume.h"
 #include "SphereVolume.h"
 #include "../../Common/Vector2.h"
 #include "../../Common/Window.h"

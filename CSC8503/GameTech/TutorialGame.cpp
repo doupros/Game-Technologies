@@ -9,12 +9,13 @@
 #include <fstream>
 #include "../../Common/Assets.h"
 #include "../CSC8503Common/PositionConstraint.h"
+#include "../CSC8503Common/WATERVolume.h"
+
 
 
 
 using namespace NCL;
 using namespace CSC8503;
-
 
 
 
@@ -388,6 +389,7 @@ void TutorialGame::InitWorld() {
 	AddAppleToWorld(Vector3(35, 2, 0));
 	AddParkKeeperToWorld(Vector3(40, 2, 0));
 	AddCharacterToWorld(Vector3(45, 2, 0));
+	AddWaterCubeToWorld(Vector3(46, -1.8, 46), Vector3(3, 0.1, 3),0);
 	GoosePathFinding();
 
 	AddFloorToWorld(Vector3(0, -4, 0));
@@ -454,6 +456,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass, bool wall) {
 	GameObject* cube = new GameObject();
 	cube->isWall = wall;
+	
 	AABBVolume* volume = new AABBVolume(dimensions);
 	cube->SetBoundingVolume((CollisionVolume*)volume);
 	
@@ -470,6 +473,30 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	world->AddGameObject(cube);
 
 	return cube;
+}
+
+GameObject* TutorialGame::AddWaterCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass, bool wall) {
+	GameObject* water = new GameObject();
+	water->isWall = wall;
+
+	WATERVolume* volume = new WATERVolume(dimensions);
+	water->SetBoundingVolume((CollisionVolume*)volume);
+
+	water->GetTransform().SetWorldPosition(position);
+	water->GetTransform().SetWorldScale(dimensions);
+
+	water->SetRenderObject(new RenderObject(&water->GetTransform(), cubeMesh, basicTex, basicShader));
+	water->GetRenderObject()->SetColour(Vector4(0, 0, 0.8, 1));
+	water->SetPhysicsObject(new PhysicsObject(&water->GetTransform(), water->GetBoundingVolume()));
+
+	water->GetPhysicsObject()->SetInverseMass(inverseMass);
+	water->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(water);
+
+	return water;
+
+
 }
 
 GameObject* TutorialGame::AddGooseToWorld(const Vector3& position)
