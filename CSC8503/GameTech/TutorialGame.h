@@ -2,6 +2,11 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 #include "../CSC8503Common/NavigationGrid.h"
+#include "../CSC8503Common/StateMachine.h"
+#include "Enemy.h"
+#include "../CSC8503Common/StateTransition.h"
+#include "../CSC8503Common/State.h"
+
 
 
 namespace NCL {
@@ -43,6 +48,16 @@ namespace NCL {
 			void DrawBaseLine();
 			void ChangeObjDir();
 			void GrabApple();
+			void MoveInWater();
+			static void enemyTrack(void* data);
+			static void enemyBack(void* data);
+			static void enemyStay(void* data);
+			void StateMachineTest();
+			void UpdateEnemy();
+
+			void AddEnemyToWorld(const Vector3& position);
+
+			static void PathFinding(Vector3& firstPos, Vector3& secondPos, GameObject* a, NavigationGrid* grid);
 
 			GameObject* AddFloorToWorld(const Vector3& position);
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
@@ -55,12 +70,14 @@ namespace NCL {
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
 			vector<GameObject*> apple;
+			vector<GameObject*> water;
+			vector<StateMachine*> enemyStateMac;
 
 			NavigationGrid* grid = nullptr;
 			GameTechRenderer*	renderer;
 			PhysicsSystem*		physics;
 			GameWorld*			world;
-
+			Enemy* aEnemy;
 			int score=0;
 			bool useGravity;
 			bool inSelectionMode;

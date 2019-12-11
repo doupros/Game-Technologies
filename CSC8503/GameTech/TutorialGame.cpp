@@ -16,6 +16,7 @@
 
 
 
+
 using namespace NCL;
 using namespace CSC8503;
 using namespace Maths;
@@ -25,12 +26,13 @@ TutorialGame::TutorialGame() {
 	world = new GameWorld();
 	renderer = new GameTechRenderer(*world);
 	physics = new PhysicsSystem(*world);
+	grid = new NavigationGrid("MapFile20.txt");
 
 	forceMagnitude = 50.0f;
-	useGravity = false;
+	useGravity = true;
 	inSelectionMode = false;
-
-	grid = new NavigationGrid("MapFile20.txt");
+	aEnemy = new Enemy;
+	//aEnemy->grid1 =  NavigationGrid("MapFile20.txt");
 	Debug::SetRenderer(renderer);
 
 	InitialiseAssets();
@@ -99,6 +101,8 @@ void TutorialGame::UpdateGame(float dt) {
 	MoveSelectedObject();
 	GoosePathFinding();
 	GrabApple();
+	MoveInWater();
+	UpdateEnemy();
 
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
@@ -108,12 +112,15 @@ void TutorialGame::UpdateGame(float dt) {
 	renderer->Render();
 
 	Debug::Print(std::to_string(apple.size()), Vector2(130, 130));
+	Debug::Print("Score: " + std::to_string(score), Vector2(1100, 600));
 }
 
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
 		InitWorld(); //We can reset the simulation at any time with F1
-		//selectionObject = nullptr;
+		selectionObject = nullptr;
+		apple.clear();
+		water.clear();
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
@@ -179,7 +186,7 @@ void TutorialGame::LockedObjectMovement() {
 		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W))
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W) && selectionObject)
 	{
 		selectionObject->GetPhysicsObject()->AddForce(fwdAxis * forceMagnitude);
 		/*Vector3 tempVec = selectionObject->GetTransform().GetLocalOrientation().ToEuler();
@@ -200,7 +207,7 @@ void TutorialGame::LockedObjectMovement() {
 		selectionObject->GetTransform().SetLocalOrientation(finalDir);
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A))
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)&& selectionObject)
 	{
 		selectionObject->GetPhysicsObject()->AddForce(-rightAxis * forceMagnitude);
 		/*Vector3 tempVec = selectionObject->GetTransform().GetLocalOrientation().ToEuler();
@@ -213,13 +220,13 @@ void TutorialGame::LockedObjectMovement() {
 		ChangeObjDir();
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S))
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S) && selectionObject)
 	{
 		selectionObject->GetPhysicsObject()->AddForce(-fwdAxis * forceMagnitude);
 		ChangeObjDir();
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D))
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D) && selectionObject)
 	{
 		selectionObject->GetPhysicsObject()->AddForce(rightAxis * forceMagnitude);
 		ChangeObjDir();
@@ -430,11 +437,14 @@ void TutorialGame::InitWorld() {
 
 	AddGooseToWorld(Vector3(12, 1, 12));
 	AddAppleToWorld(Vector3(35, 2, 0));
-	AddParkKeeperToWorld(Vector3(120, 2, 18));
+	//AddParkKeeperToWorld(Vector3(120, 2, 18));
 	AddCharacterToWorld(Vector3(45, 2, 0));
-	AddWaterCubeToWorld(Vector3(3 * 6, -1.8, 3 * 6));
-	AddWaterCubeToWorld(Vector3(2 * 6, -1.8, 3 * 6));
-	AddWaterCubeToWorld(Vector3(3 * 6, -1.8, 2 * 6));
+	AddEnemyToWorld(Vector3(120, 2, 18));
+
+	water.push_back(AddWaterCubeToWorld(Vector3(3 * 6, -1.8, 3 * 6)));
+	water.push_back(AddWaterCubeToWorld(Vector3(2 * 6, -1.8, 3 * 6)));
+	water.push_back(AddWaterCubeToWorld(Vector3(3 * 6, -1.8, 2 * 6)));
+
 	AddSpawnToWorld(Vector3(12,-1.8,12));
 	AddFloorToWorld(Vector3(0, -4, 0));
 
@@ -524,7 +534,7 @@ GameObject* TutorialGame::AddWaterCubeToWorld(const Vector3& position,bool isWat
 	GameObject* water = new GameObject("water");
 	water->isWall = true;
 	water->isWater = true;
-	WATERVolume* volume = new WATERVolume(Vector3(3, 0.1, 3));
+	WATERVolume* volume = new WATERVolume(Vector3(3, 0.01, 3));
 	water->SetBoundingVolume((CollisionVolume*)volume);
 	water->GetTransform().SetWorldPosition(position);
 	water->GetTransform().SetWorldScale(Vector3(3, 0.1, 3));
@@ -542,7 +552,7 @@ GameObject* TutorialGame::AddSpawnToWorld(const Vector3& position) {
 	spawn->isWall = true;
 	spawn->isWater = false;
 	spawn->isSpown = true;
-	AABBVolume* volume = new AABBVolume(Vector3(3, 0.5, 3));
+	AABBVolume* volume = new AABBVolume(Vector3(3, 1.5, 3));
 	spawn->SetBoundingVolume((CollisionVolume*)volume);
 	spawn->GetTransform().SetWorldPosition(position);
 	spawn->GetTransform().SetWorldScale(Vector3(3, 0.1, 3));
@@ -584,7 +594,7 @@ GameObject* TutorialGame::AddParkKeeperToWorld(const Vector3& position)
 	float meshSize = 4.0f;
 	float inverseMass = 0.5f;
 
-	GameObject* keeper = new GameObject();
+	GameObject* keeper = new GameObject("keeper");
 
 	AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
 	keeper->SetBoundingVolume((CollisionVolume*)volume);
@@ -844,24 +854,22 @@ void TutorialGame::GrabApple() {
 	vector<GameObject> tempVector;
 	//world->GetObjectIterators(first, last);
 
-
 	for (auto i = first; i != last; ++i) {
 		CollisionDetection::CollisionInfo info;
 		bool gooseAndspawn = CollisionDetection::ObjectIntersection(spawn, goose, info);
 		if ((*i)->appleState==1&& gooseAndspawn){
 			std::cout << "Collision between " << (spawn)->GetName() << " and " << (goose)->GetName() << std::endl;
+			(*i)->appleState = 0;
 			Vector3 tempVec3 = spawn->GetTransform().GetWorldPosition();
-			(*i)->GetTransform().SetWorldPosition(Vector3(tempVec3.x, tempVec3.y + 3, tempVec3.z));
+			(*i)->GetTransform().SetWorldPosition(Vector3(tempVec3.x, tempVec3.y + 20, tempVec3.z));
+			score++;
 		}
 		if ((*i)->appleState==1&&!gooseAndspawn){
 			Vector3 tempVec3 = goose->GetTransform().GetWorldPosition();
-			(*i)->GetTransform().SetWorldPosition(Vector3(tempVec3.x, tempVec3.y + 5, tempVec3.z));
-			Debug::Print("Score: " + std::to_string(score), Vector2(800, 500));
+			(*i)->GetTransform().SetWorldPosition(Vector3(tempVec3.x, tempVec3.y + 10, tempVec3.z));
 		}
-		
 		if (CollisionDetection::ObjectIntersection(*i,goose,info)){
 			std::cout << "Collision between " << (*i)->GetName() << " and " << (goose)->GetName() << std::endl;
-			score++;
 			
 			(*i)->appleState = 1;
 		}
@@ -879,4 +887,132 @@ void TutorialGame::GrabApple() {
 				tempVec.y += 2;
 				(*j)->GetTransform().SetWorldPosition(tempVec);
 			}*/
+}
+
+void TutorialGame::MoveInWater() {
+	std::vector < GameObject* >::const_iterator first = water.begin();
+	std::vector < GameObject* >::const_iterator last = water.end();
+	for (auto i = first; i != last; ++i){
+		CollisionDetection::CollisionInfo info;
+		bool gooseAndWater = CollisionDetection::ObjectIntersection((*i), goose, info);
+		if (gooseAndWater)
+		{
+			goose->GetPhysicsObject()->AddForce(-(goose->GetPhysicsObject()->GetForce())/5);
+			std::cout << "Collision between " << (*i)->GetName() << " and " << (goose)->GetName() << std::endl;
+		}
+	}
+
+
+
+}
+
+void TutorialGame::PathFinding(Vector3& firstPos,Vector3 &secondPos,GameObject *a,NavigationGrid* grid) {
+	vector<Vector3> mapNodes;
+	if (a){
+		NavigationPath outPath;
+		//Vector3 startPos = selectionObject->GetTransform().GetWorldPosition();
+		//Vector3 endPos = goose->GetTransform().GetWorldPosition();//(120, 6, 120);
+		bool found = grid->FindPath(firstPos, secondPos, outPath);
+		Vector3 pos;
+		while (outPath.PopWaypoint(pos)) {
+			mapNodes.push_back(pos);
+		}
+		for (int i = 1; i < mapNodes.size(); ++i) {
+			Vector3 a = mapNodes[i - 1];
+			//	a.x += startPos.y;
+			Vector3 b = mapNodes[i];
+
+			//Debug::DrawLine(a, b, Vector4(0, 1, 0, 1));
+			Debug::DrawLine(Vector3(a.x + 6, a.y, a.z + 6), Vector3(b.x + 6, b.y, b.z + 6), Vector4(1, 0, 0, 1));
+		}
+	}
+}
+
+void TutorialGame::AddEnemyToWorld(const Vector3 &position) {
+	float inverseMass = 0.5f;
+
+	aEnemy = new Enemy;
+
+	aEnemy->enemy->GetTransform().SetWorldPosition(position);
+	aEnemy->enemyPos = position;
+	aEnemy->enemy->SetRenderObject
+	(new RenderObject(&aEnemy->enemy->GetTransform(), keeperMesh, nullptr, basicShader));
+
+	aEnemy->enemy->SetPhysicsObject
+	(new PhysicsObject(&aEnemy->enemy->GetTransform(), aEnemy->enemy->GetBoundingVolume()));
+
+	aEnemy->enemy->GetPhysicsObject()->SetInverseMass(inverseMass);
+	aEnemy->enemy->GetPhysicsObject()->InitCubeInertia();
+	world->AddGameObject(aEnemy->enemy);
+}
+
+void TutorialGame::enemyTrack(void* data) {
+	Enemy* temp = (Enemy*)data;
+	temp->disToGoose = (temp->goosePos - temp->GetTransform().GetWorldPosition()).Length();
+	temp->disToDefault = (temp->enemyPos - temp->GetTransform().GetWorldPosition()).Length();
+	PathFinding(temp->GetTransform().GetWorldPosition(), temp->goosePos, temp->enemy,temp->grid1);
+}
+
+void TutorialGame::enemyBack(void* data) {
+	Enemy* temp = (Enemy*)data;
+	temp->disToGoose = (temp->goosePos - temp->GetTransform().GetWorldPosition()).Length();
+	temp->disToDefault = (temp->enemyPos - temp->GetTransform().GetWorldPosition()).Length();
+	PathFinding(temp->GetTransform().GetWorldPosition(), temp->enemyPos, temp->enemy, temp->grid1);
+}
+
+void TutorialGame::enemyStay(void* data) {
+	Enemy* temp = (Enemy*)data;
+	temp->disToGoose = (temp->goosePos - temp->GetTransform().GetWorldPosition()).Length();
+	temp->disToDefault = (temp->enemyPos - temp->GetTransform().GetWorldPosition()).Length();
+	
+}
+
+void TutorialGame::StateMachineTest() {
+
+	StateMachine* newMachine= new StateMachine();
+
+	StateFunc TrackEnemy = &TutorialGame::enemyTrack;
+	StateFunc BackEnemy = &TutorialGame::enemyBack;
+	StateFunc StayEnemy = &TutorialGame::enemyStay;
+	
+	GenericState* Track = new GenericState(TrackEnemy, (void*)(aEnemy));
+	GenericState* Back = new GenericState(BackEnemy, (void*)(aEnemy));
+	GenericState* Stay = new GenericState(StayEnemy, (void*)(aEnemy));
+
+	newMachine->AddState(Track);
+	newMachine->AddState(Back);
+	newMachine->AddState(Stay);
+
+	GenericTransition<float&, float>* transitionA =
+		new GenericTransition<float&, float>(
+		   	   GenericTransition<float&, float>::GreaterThanTransition, aEnemy->disToDefault, 25.0f, Track, Back);
+
+	GenericTransition<float&, float>* transitionB =
+		new GenericTransition<float&, float>(
+			GenericTransition<float&, float>::GreaterThanTransition, aEnemy->disToDefault, 5.0f, Back, Stay);
+
+	GenericTransition<float&, float>* transitionC =
+		new GenericTransition<float&, float>(
+			GenericTransition<float&, float>::GreaterThanTransition, aEnemy->disToGoose, 30.0f, Stay, Track);
+
+	GenericTransition<float&, float>* transitionD =
+		new GenericTransition<float&, float>(
+			GenericTransition<float&, float>::GreaterThanTransition, aEnemy->disToGoose, 50.0f, Track, Back);
+	
+	newMachine->AddTransition(transitionA);
+	newMachine->AddTransition(transitionB);
+	newMachine->AddTransition(transitionC);
+	newMachine->AddTransition(transitionD);
+
+	enemyStateMac.emplace_back(newMachine);
+}
+
+void TutorialGame::UpdateEnemy(){
+	std::vector<StateMachine*>::iterator first = enemyStateMac.begin();
+	Vector3 goosePos = goose->GetTransform().GetWorldPosition();
+	for (auto i = first; i != enemyStateMac.end(); i++)
+	{
+		(*i)->Update();
+	}
+	aEnemy->goosePos = goosePos;
 }
