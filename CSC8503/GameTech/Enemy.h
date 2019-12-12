@@ -9,18 +9,12 @@ namespace NCL {
 		public:
 			Enemy();
 			~Enemy();
-			GameObject* enemy;
+			//GameObject* enemy;
 			Vector3 goosePos;
 			Vector3 enemyPos;
 			NavigationGrid *grid1;
 			float disToGoose;
 			float disToDefault;
-			
-
 		};
-
-		
-
-
 	}
 }

@@ -47,7 +47,7 @@ namespace NCL {
 			void GenerateMap(const std::string& filename);
 			void GoosePathFinding();
 			void DrawBaseLine();
-			void ChangeObjDir();
+			void ChangeObjDir(GameObject* object);
 			void GrabApple();
 			void MoveInWater();
 			static void enemyTrack(void* data);
@@ -61,7 +61,7 @@ namespace NCL {
 			void ClientWorking();
 
 
-			void AddEnemyToWorld(const Vector3& position);
+			GameObject* AddEnemyToWorld(const Vector3& position);
 
 			static void PathFinding(Vector3& firstPos, Vector3& secondPos, GameObject* a, NavigationGrid* grid);
 
@@ -78,6 +78,7 @@ namespace NCL {
 			vector<GameObject*> apple;
 			vector<GameObject*> water;
 			vector<StateMachine*> enemyStateMac;
+			vector<Enemy*> enemys;
 
 			NavigationGrid* grid = nullptr;
 			GameTechRenderer*	renderer;

@@ -77,6 +77,7 @@ namespace NCL {
 			bool isSpown;
 			bool isWater;
 			int appleState = 0;
+			Vector3 defultPos;
 
 			void UpdateBroadphaseAABB();
 

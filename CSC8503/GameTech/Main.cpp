@@ -157,7 +157,7 @@ int main() {
 		return -1;
 	}	
 
-	TestStateMachine();
+	//TestStateMachine();
 	//TestNetworking();
 	//TestPathfinding();
 	
