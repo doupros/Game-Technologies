@@ -9,9 +9,6 @@ namespace NCL {
 			AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
 			this->SetBoundingVolume((CollisionVolume*)volume);
 			this->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
-			
 		}
-
-	
 	}
 }

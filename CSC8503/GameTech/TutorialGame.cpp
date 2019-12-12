@@ -25,15 +25,14 @@ TutorialGame::TutorialGame() {
 	physics = new PhysicsSystem(*world);
 	grid = new NavigationGrid("MapFile20.txt");
 	forceMagnitude = 50.0f;
-	useGravity = true;
+	useGravity = false;
 	inSelectionMode = false;
 	aEnemy = new Enemy;
 	//aEnemy->grid1 = grid;
 	aEnemy->grid1 = new NavigationGrid("MapFile20.txt");
-
-	
 	Debug::SetRenderer(renderer);
 	InitialiseAssets();
+	ball->appleState = 0;
 }
 
 /*
@@ -126,6 +125,7 @@ void TutorialGame::UpdateGame(float dt) {
 			Debug::Print("YOU WIN!  Time Use:" + std::to_string((int)totalTime), Vector2(300, 700));
 		}
 	}
+
 	Debug::Print(std::to_string(apple.size()), Vector2(130, 130));
 	Debug::Print("Score: " + std::to_string(score), Vector2(1000, 700));
 }
@@ -140,7 +140,6 @@ void TutorialGame::UpdateKeys() {
 		enemyStateMac.clear();
 		InitCamera();
 		InitWorld(); //We can reset the simulation at any time with F1
-		
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
@@ -167,6 +166,10 @@ void TutorialGame::UpdateKeys() {
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F8)) {
 		world->ShuffleObjects(false);
+	}
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::X)) {
+		lockedObject = goose;
+		selectionObject = goose;
 	}
 
 	if (lockedObject) {
@@ -278,7 +281,6 @@ void  TutorialGame::LockedCameraMovement() {
 
 	}
 }
-
 
 void TutorialGame::DebugObjectMovement() {
 	//If we've selected an object, we can manipulate it with some key presses
@@ -462,6 +464,7 @@ void TutorialGame::InitWorld() {
 	AddEnemyToWorld(Vector3(114, 2, 18));
 	AddEnemyToWorld(Vector3(114, 2, 60));
 	AddEnemyToWorld(Vector3(60, 2, 60));
+	ball = AddSphereToWorld(Vector3(114, 5, 108), 2);
 
 	water.push_back(AddWaterCubeToWorld(Vector3(3 * 6, -1.8, 3 * 6)));
 	water.push_back(AddWaterCubeToWorld(Vector3(2 * 6, -1.8, 3 * 6)));
@@ -473,6 +476,7 @@ void TutorialGame::InitWorld() {
 	DrawBaseLine();
 
 	StateMachineTest();
+
 }
 
 //From here on it's functions to add in objects to the world!
@@ -900,6 +904,19 @@ void TutorialGame::GrabApple() {
 			std::cout << "Collision between " << (*i)->GetName() << " and " << (goose)->GetName() << std::endl;
 			(*i)->appleState = 2;//collecting
 		}
+		if (CollisionDetection::ObjectIntersection(ball, goose, info)&&ball->appleState==0)
+		{
+			ball->appleState = 2;
+			constraint = new PositionConstraint(goose, ball, 2.0f);
+			world->AddConstraint(constraint);
+		}
+		if (ball->appleState == 2 && gooseAndspawn)
+		{
+			world->RemoveConstraint(constraint);
+			ball->appleState = 3;
+			score += 2;
+		}
+
 	}	
 	/*	if ((*i)->GetPhysicsObject() == nullptr) {
 			continue;(*i).
@@ -915,7 +932,7 @@ void TutorialGame::GrabApple() {
 				(*j)->GetTransform().SetWorldPosition(tempVec);
 			}*/
 	
-	for (auto j = enemys.begin(); j != enemys.end(); j++)
+	for (auto j = enemys.begin(); j != enemys.end(); j++)//touch AI back all apple
 	{
 		for (auto i = first; i != last; i++)
 		{
@@ -927,6 +944,8 @@ void TutorialGame::GrabApple() {
 			}
 		}
 	}
+
+
 }
 
 void TutorialGame::MoveInWater() {
@@ -1076,12 +1095,11 @@ void TutorialGame::UpdateEnemy(){
 	{
 		(*i)->goosePos = goosePos;
 	}
-	
 }
 
 void TutorialGame::TimeCounting(float dt) {
 	totalTime += dt;
-	Debug::Print("totalTime: " + std::to_string((int)totalTime), Vector2(600, 700));
+	Debug::Print("totalTime: " + std::to_string((int)totalTime), Vector2(540, 700));
 }
 
 void TutorialGame::ServerWorking() {
@@ -1089,5 +1107,9 @@ void TutorialGame::ServerWorking() {
 }
 
 void TutorialGame::ClientWorking() {
+
+}
+
+void TutorialGame::ConstraintBall() {
 
 }

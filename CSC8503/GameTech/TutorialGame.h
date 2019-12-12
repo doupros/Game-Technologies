@@ -6,6 +6,7 @@
 #include "Enemy.h"
 #include "../CSC8503Common/StateTransition.h"
 #include "../CSC8503Common/State.h"
+#include "../CSC8503Common/PositionConstraint.h"
 //#include "NetworkedGame.h"
 
 
@@ -59,6 +60,7 @@ namespace NCL {
 			void TimeCounting(float dt);
 			void ServerWorking();
 			void ClientWorking();
+			void ConstraintBall();
 
 
 			GameObject* AddEnemyToWorld(const Vector3& position);
@@ -75,6 +77,7 @@ namespace NCL {
 			GameObject* AddParkKeeperToWorld(const Vector3& position);
 			GameObject* AddCharacterToWorld(const Vector3& position);
 			GameObject* AddAppleToWorld(const Vector3& position);
+			GameObject* ball;
 			vector<GameObject*> apple;
 			vector<GameObject*> water;
 			vector<StateMachine*> enemyStateMac;
@@ -85,6 +88,7 @@ namespace NCL {
 			PhysicsSystem*		physics;
 			GameWorld*			world;
 			Enemy* aEnemy;
+			PositionConstraint* constraint;
 			int score=0;
 			bool useGravity;
 			bool inSelectionMode;
