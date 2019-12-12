@@ -8,7 +8,6 @@ namespace NCL {
 			grid1 = new NavigationGrid("MapFile20.txt");
 			AABBVolume* volume = new AABBVolume(Vector3(0.3, 0.9f, 0.3) * meshSize);
 			enemy->SetBoundingVolume((CollisionVolume*)volume);
-
 			enemy->GetTransform().SetWorldScale(Vector3(meshSize, meshSize, meshSize));
 			
 		}

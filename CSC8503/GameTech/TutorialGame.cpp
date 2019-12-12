@@ -14,9 +14,6 @@
 #include "../../Common/Maths.h"
 
 
-
-
-
 using namespace NCL;
 using namespace CSC8503;
 using namespace Maths;
@@ -27,14 +24,13 @@ TutorialGame::TutorialGame() {
 	renderer = new GameTechRenderer(*world);
 	physics = new PhysicsSystem(*world);
 	grid = new NavigationGrid("MapFile20.txt");
-
 	forceMagnitude = 50.0f;
 	useGravity = true;
 	inSelectionMode = false;
 	aEnemy = new Enemy;
-	//aEnemy->grid1 =  NavigationGrid("MapFile20.txt");
+	//aEnemy->grid1 = grid;
+	aEnemy->grid1 = new NavigationGrid("MapFile20.txt");
 	Debug::SetRenderer(renderer);
-
 	InitialiseAssets();
 }
 
@@ -110,17 +106,36 @@ void TutorialGame::UpdateGame(float dt) {
 
 	Debug::FlushRenderables();
 	renderer->Render();
+	if (lockedObject)
+	{
+		TimeCounting(dt);
+		if (totalTime >= 180.0)
+		{
+			lockedObject = nullptr;
+			Debug::Print("Game END ", Vector2(300, 700));
+		}
+		if (score >= 25)
+		{
+			lockedObject = nullptr;
+			selectionObject = nullptr;
+			InitCamera();
+			Debug::Print("YOU WIN!  Time Use:" + std::to_string((int)totalTime), Vector2(300, 700));
+		}
+	}
 
 	Debug::Print(std::to_string(apple.size()), Vector2(130, 130));
-	Debug::Print("Score: " + std::to_string(score), Vector2(1100, 600));
+	Debug::Print("Score: " + std::to_string(score), Vector2(1000, 700));
 }
 
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
-		InitWorld(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
+		totalTime = 0;
 		apple.clear();
 		water.clear();
+		InitCamera();
+		InitWorld(); //We can reset the simulation at any time with F1
+		
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
@@ -422,7 +437,7 @@ void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetNearPlane(0.5f);
 	world->GetMainCamera()->SetFarPlane(500.0f);
 	world->GetMainCamera()->SetPitch(-15.0f);
-	world->GetMainCamera()->SetYaw(315.0f);
+	world->GetMainCamera()->SetYaw(-90.0f);
 	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
 	lockedObject = nullptr;
 }
@@ -449,6 +464,8 @@ void TutorialGame::InitWorld() {
 	AddFloorToWorld(Vector3(0, -4, 0));
 
 	DrawBaseLine();
+
+	StateMachineTest();
 }
 
 //From here on it's functions to add in objects to the world!
@@ -840,12 +857,14 @@ void TutorialGame::ChangeObjDir() {
 	Vector3 forceDir = selectionObject->GetPhysicsObject()->GetForce();
 	forceDir.Normalise();
 	float len = forceDir.Length();
-	float angle = acos(forceDir.z / len);
-	if (forceDir.x < 0)angle = -angle;
-	Quaternion currentDir = selectionObject->GetTransform().GetLocalOrientation();
-	Quaternion dirShouldBe = Quaternion::AxisAngleToQuaterion(Vector3(0, 1, 0), Maths::RadiansToDegrees(angle));
-	Quaternion finalDir = Quaternion::Lerp(currentDir, dirShouldBe, 0.20f);
-	selectionObject->GetTransform().SetLocalOrientation(finalDir);
+	if (len != 0) {
+		float angle = acos(forceDir.z / len);
+		if (forceDir.x < 0)angle = -angle;
+		Quaternion currentDir = selectionObject->GetTransform().GetLocalOrientation();
+		Quaternion dirShouldBe = Quaternion::AxisAngleToQuaterion(Vector3(0, 1, 0), Maths::RadiansToDegrees(angle));
+		Quaternion finalDir = Quaternion::Lerp(currentDir, dirShouldBe, 0.20f);
+		selectionObject->GetTransform().SetLocalOrientation(finalDir);
+	}
 }
 
 void TutorialGame::GrabApple() {
@@ -859,7 +878,7 @@ void TutorialGame::GrabApple() {
 		bool gooseAndspawn = CollisionDetection::ObjectIntersection(spawn, goose, info);
 		if ((*i)->appleState==1&& gooseAndspawn){
 			std::cout << "Collision between " << (spawn)->GetName() << " and " << (goose)->GetName() << std::endl;
-			(*i)->appleState = 0;
+			(*i)->appleState = 3;
 			Vector3 tempVec3 = spawn->GetTransform().GetWorldPosition();
 			(*i)->GetTransform().SetWorldPosition(Vector3(tempVec3.x, tempVec3.y + 20, tempVec3.z));
 			score++;
@@ -868,7 +887,7 @@ void TutorialGame::GrabApple() {
 			Vector3 tempVec3 = goose->GetTransform().GetWorldPosition();
 			(*i)->GetTransform().SetWorldPosition(Vector3(tempVec3.x, tempVec3.y + 10, tempVec3.z));
 		}
-		if (CollisionDetection::ObjectIntersection(*i,goose,info)){
+		if (CollisionDetection::ObjectIntersection(*i,goose,info)&& (*i)->appleState ==0){
 			std::cout << "Collision between " << (*i)->GetName() << " and " << (goose)->GetName() << std::endl;
 			
 			(*i)->appleState = 1;
@@ -897,12 +916,10 @@ void TutorialGame::MoveInWater() {
 		bool gooseAndWater = CollisionDetection::ObjectIntersection((*i), goose, info);
 		if (gooseAndWater)
 		{
-			goose->GetPhysicsObject()->AddForce(-(goose->GetPhysicsObject()->GetForce())/5);
+			goose->GetPhysicsObject()->AddForce(-(goose->GetPhysicsObject()->GetForce())/2);
 			std::cout << "Collision between " << (*i)->GetName() << " and " << (goose)->GetName() << std::endl;
 		}
 	}
-
-
 
 }
 
@@ -950,7 +967,7 @@ void TutorialGame::enemyTrack(void* data) {
 	Enemy* temp = (Enemy*)data;
 	temp->disToGoose = (temp->goosePos - temp->GetTransform().GetWorldPosition()).Length();
 	temp->disToDefault = (temp->enemyPos - temp->GetTransform().GetWorldPosition()).Length();
-	PathFinding(temp->GetTransform().GetWorldPosition(), temp->goosePos, temp->enemy,temp->grid1);
+	PathFinding(temp->enemy->GetTransform().GetWorldPosition(), temp->goosePos, temp->enemy,temp->grid1);
 }
 
 void TutorialGame::enemyBack(void* data) {
@@ -1015,4 +1032,17 @@ void TutorialGame::UpdateEnemy(){
 		(*i)->Update();
 	}
 	aEnemy->goosePos = goosePos;
+}
+
+void TutorialGame::TimeCounting(float dt) {
+	totalTime += dt;
+	Debug::Print("totalTime: " + std::to_string((int)totalTime), Vector2(600, 700));
+}
+
+void TutorialGame::ServerWorking() {
+
+}
+
+void TutorialGame::ClientWorking() {
+
 }

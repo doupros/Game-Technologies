@@ -6,6 +6,7 @@
 #include "Enemy.h"
 #include "../CSC8503Common/StateTransition.h"
 #include "../CSC8503Common/State.h"
+//#include "NetworkedGame.h"
 
 
 
@@ -54,6 +55,11 @@ namespace NCL {
 			static void enemyStay(void* data);
 			void StateMachineTest();
 			void UpdateEnemy();
+			float totalTime=0;
+			void TimeCounting(float dt);
+			void ServerWorking();
+			void ClientWorking();
+
 
 			void AddEnemyToWorld(const Vector3& position);
 
