@@ -281,7 +281,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
 
 	// Separate them out using projection
-	transformA.SetWorldPosition(transformA.GetWorldPosition() -	(p.normal * p.penetration * (physA->GetInverseMass() / totalMass)));
+	transformA.SetWorldPosition(transformA.GetWorldPosition() -(p.normal * p.penetration * (physA->GetInverseMass() / totalMass)));
 	transformB.SetWorldPosition(transformB.GetWorldPosition() + (p.normal * p.penetration * (physB->GetInverseMass() / totalMass)));
 
 	Vector3 relativeA = p.localA;// -transformA.GetWorldPosition();//相对向量
@@ -309,11 +309,34 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	float j = (-(1.0f + cRestitution) * impulseForce) /(totalMass + angularEffect);
 
 	Vector3 fullImpulse = p.normal * j;
-	physA -> ApplyLinearImpulse(-fullImpulse);
-	physB -> ApplyLinearImpulse(fullImpulse);
+	if (!a.isWater)
+	{
+		physA->ApplyLinearImpulse(-fullImpulse);
+		physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
+	}
+	else
+	{
+	//std::cout << "is water" << std::endl;
+	if (b.GetName()=="goose")
+	{
+		b.GetPhysicsObject()->ClearForces();
+		if (b.GetPhysicsObject()->GetInverseMass()<1.5f)
+		{
+			b.GetPhysicsObject()->SetInverseMass(b.GetPhysicsObject()->GetInverseMass() + 0.1f);
+		}
+		//std::cout <<  << std::endl;
+	}
+	}
+	if (!b.isWater)
+	{
+		physB->ApplyLinearImpulse(fullImpulse);
+		physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
+	}
+	else
+	{
+		std::cout << "is water" << std::endl;
+	}
 
-	physA -> ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
-	physB -> ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
 }
 
 /*

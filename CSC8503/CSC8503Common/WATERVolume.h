@@ -11,7 +11,6 @@ namespace NCL {
 			halfSizes = halfDims;
 		}
 		~WATERVolume() {
-
 		}
 
 		Vector3 GetHalfDimensions() const {

@@ -1089,9 +1089,7 @@ void TutorialGame::StateMachineTest() {
 		newMachine->AddTransition(transitionB);
 		newMachine->AddTransition(transitionC);
 		newMachine->AddTransition(transitionD);
-
 		enemyStateMac.emplace_back(newMachine);
-		
 	}
 }
 
@@ -1122,6 +1120,3 @@ void TutorialGame::ClientWorking() {
 
 }
 
-void TutorialGame::ConstraintBall() {
-
-}
