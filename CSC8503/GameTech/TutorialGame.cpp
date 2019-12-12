@@ -70,6 +70,12 @@ TutorialGame::~TutorialGame() {
 	delete gooseMesh;
 	delete basicTex;
 	delete basicShader;
+	delete ball;
+	delete grid;
+	delete constraint;
+	delete selectionObject;
+	delete spawn;
+	delete goose;
 
 	delete physics;
 	delete renderer;
@@ -117,7 +123,7 @@ void TutorialGame::UpdateGame(float dt) {
 			InitCamera();
 			Debug::Print("Game END ", Vector2(300, 700));
 		}
-		if (score >= 25)
+		if (score >= 27)
 		{
 			lockedObject = nullptr;
 			selectionObject = nullptr;
@@ -138,6 +144,7 @@ void TutorialGame::UpdateKeys() {
 		water.clear();
 		enemys.clear();
 		enemyStateMac.clear();
+		score = 0;
 		InitCamera();
 		InitWorld(); //We can reset the simulation at any time with F1
 	}
@@ -458,12 +465,15 @@ void TutorialGame::InitWorld() {
 	//AddGooseToWorld(Vector3(30, 2, 0));
 
 	AddGooseToWorld(Vector3(12, 1, 12));
-	AddAppleToWorld(Vector3(35, 2, 0));
+	//AddAppleToWorld(Vector3(35, 2, 0));
 	//AddParkKeeperToWorld(Vector3(120, 2, 18));
-	AddCharacterToWorld(Vector3(45, 2, 0));
+	//AddCharacterToWorld(Vector3(45, 2, 0));
 	AddEnemyToWorld(Vector3(114, 2, 18));
 	AddEnemyToWorld(Vector3(114, 2, 60));
 	AddEnemyToWorld(Vector3(60, 2, 60));
+	AddEnemyToWorld(Vector3(18, 2, 60));
+	AddEnemyToWorld(Vector3(30, 2, 114));
+	AddEnemyToWorld(Vector3(20, 2, 96));
 	ball = AddSphereToWorld(Vector3(114, 5, 108), 2);
 
 	water.push_back(AddWaterCubeToWorld(Vector3(3 * 6, -1.8, 3 * 6)));
@@ -527,6 +537,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 
 	sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
 	sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+	sphere->GetRenderObject()->SetColour(Vector4(1, 0, 0, 1));
 
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia();
@@ -913,6 +924,7 @@ void TutorialGame::GrabApple() {
 		if (ball->appleState == 2 && gooseAndspawn)
 		{
 			world->RemoveConstraint(constraint);
+			ball->GetTransform().SetWorldPosition(Vector3(0, 0, 0));
 			ball->appleState = 3;
 			score += 2;
 		}
