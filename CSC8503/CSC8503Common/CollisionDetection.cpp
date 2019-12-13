@@ -282,8 +282,24 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
 bool CollisionDetection::OBBIntersection(
 	const OBBVolume& volumeA, const Transform& worldTransformA,
 	const OBBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
+
+	/*Quaternion orientationA = worldTransformA.GetWorldOrientation();
+	Vector3 positionA = worldTransformA.GetWorldPosition();
+
+	Matrix3 transformA = orientationA.ToMatrix3();
+	Matrix3 invTransformA = orientationA.Conjugate().ToMatrix3();
+
+	Quaternion orientationB = worldTransformB.GetWorldOrientation();
+	Vector3 positionB = worldTransformB.GetWorldPosition();
+
+	Matrix3 transformB = orientationB.ToMatrix3();
+	Matrix3 invTransformB = orientationB.Conjugate().ToMatrix3();
+
+	*/
 	return false;
 }
+
+
 
 //It's helper functions for generating rays from here on out:
 

@@ -14,7 +14,7 @@ using namespace CSC8503;
 
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	applyGravity	= false;
-	useBroadPhase	= false;	
+	useBroadPhase	= true;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.95f;
 	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
@@ -349,8 +349,34 @@ compare the collisions that we absolutely need to.
 */
 
 void PhysicsSystem::BroadPhase() {
+	broadphaseCollisions.clear();
+	QuadTree <GameObject*> tree(Vector2(1024, 1024), 7, 6);
 
-}
+	std::vector < GameObject* >::const_iterator first;
+	std::vector < GameObject* >::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
+	for (auto i = first; i != last; ++i) {
+		Vector3 halfSizes;
+		if (!(*i)->GetBroadphaseAABB(halfSizes)) {
+			continue;
+		}
+		Vector3 pos = (*i)->GetConstTransform().GetWorldPosition();
+		tree.Insert(*i, pos, halfSizes);
+	}
+	tree.OperateOnContents(
+		[&](std::list < QuadTreeEntry < GameObject* > >& data) {
+			CollisionDetection::CollisionInfo info;
+			for (auto i = data.begin(); i != data.end(); ++i) {
+				for (auto j = std::next(i); j != data.end(); ++j) {
+					// is this pair of items already in the collision set -
+					// if the same pair is in another quadtree node together etc
+					info.a = min((*i).object, (*j).object);
+					info.b = max((*i).object, (*j).object);
+					broadphaseCollisions.insert(info);
+				}
+			}
+		});
+}
 
 /*
 
@@ -358,7 +384,16 @@ The broadphase will now only give us likely collisions, so we can now go through
 and work out if they are truly colliding, and if so, add them into the main collision list
 */
 void PhysicsSystem::NarrowPhase() {
-
+	for (std::set < CollisionDetection::CollisionInfo >::iterator
+		i = broadphaseCollisions.begin();
+		i != broadphaseCollisions.end(); ++i) {
+		CollisionDetection::CollisionInfo info = *i;
+		if (CollisionDetection::ObjectIntersection(info.a, info.b, info)) {
+			info.framesLeft = numCollisionFrames;
+			ImpulseResolveCollision(*info.a, *info.b, info.point);
+			allCollisions.insert(info); // insert into our main set
+		}
+	}
 }
 
 /*

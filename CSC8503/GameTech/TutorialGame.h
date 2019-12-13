@@ -7,7 +7,13 @@
 #include "../CSC8503Common/StateTransition.h"
 #include "../CSC8503Common/State.h"
 #include "../CSC8503Common/PositionConstraint.h"
+
+#include "..\CSC8503Common\NetworkBase.h"
+#include "..\CSC8503Common\NetworkObject.h"
+#include "..\CSC8503Common\GameClient.h"
+#include "..\CSC8503Common\GameServer.h"
 //#include "NetworkedGame.h"
+#include "PacketRecTest.h"
 
 
 
@@ -61,6 +67,9 @@ namespace NCL {
 			void ServerWorking();
 			void ClientWorking();
 			void ConstraintBall();
+			void UpdatePacketServer();
+			void UpdatePacketClient();
+
 
 
 			GameObject* AddEnemyToWorld(const Vector3& position);
@@ -92,8 +101,15 @@ namespace NCL {
 			int score=0;
 			bool useGravity;
 			bool inSelectionMode;
-
 			float		forceMagnitude;
+
+			GameServer* server;
+			GameClient* client;
+			NetworkObject* NetObj;
+			PacketRecTest* receiver1;
+			PacketRecTest* receiver2;
+			GamePacket* stringPacket;
+			GamePacket* timePacket;
 
 			GameObject* selectionObject = nullptr;
 

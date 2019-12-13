@@ -14,7 +14,8 @@ enum BasicNetworkMessages {
 	Received_State, //received from a client, informs that its received packet n
 	Player_Connected,
 	Player_Disconnected,
-	Shutdown
+	Shutdown,
+	Time_Message
 };
 
 struct GamePacket {
@@ -68,6 +69,20 @@ struct PlayerDisconnectPacket : public GamePacket {
 		playerID	= p;
 		size		= sizeof(int);
 	}
+};
+
+struct TimePacket :public GamePacket {
+	int time;
+	TimePacket(int time) {
+		type = BasicNetworkMessages::Time_Message;
+		this->time = time;
+		size = sizeof(int);
+	}
+	int GetTimeFromData() {
+		int realData(time);
+		return realData;
+	}
+
 };
 
 class PacketReceiver {

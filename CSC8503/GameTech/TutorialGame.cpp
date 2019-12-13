@@ -105,6 +105,8 @@ void TutorialGame::UpdateGame(float dt) {
 	GoosePathFinding();
 	GrabApple();
 	MoveInWater();
+	//UpdatePacketServer();
+	//UpdatePacketClient();
 	
 	UpdateEnemy();
 
@@ -129,11 +131,14 @@ void TutorialGame::UpdateGame(float dt) {
 			selectionObject = nullptr;
 			InitCamera();
 			Debug::Print("YOU WIN!  Time Use:" + std::to_string((int)totalTime), Vector2(300, 700));
+			std::cout << "YOU WIN!  Time Use:" << totalTime <<std::endl;
 		}
 	}
 
 	Debug::Print(std::to_string(apple.size()), Vector2(130, 130));
 	Debug::Print("Score: " + std::to_string(score), Vector2(1000, 700));
+	Debug::Print("Press (F1) to RESTARE game  ", Vector2(10, 680));
+	Debug::Print("Press (X) to STRAT game" , Vector2(10, 660));
 }
 
 void TutorialGame::UpdateKeys() {
@@ -474,7 +479,7 @@ void TutorialGame::InitWorld() {
 	AddEnemyToWorld(Vector3(18, 2, 60));
 	AddEnemyToWorld(Vector3(30, 2, 114));
 	AddEnemyToWorld(Vector3(20, 2, 96));
-	ball = AddSphereToWorld(Vector3(114, 5, 108), 2);
+	ball = AddSphereToWorld(Vector3(114, 2, 108), 2);
 
 	water.push_back(AddWaterCubeToWorld(Vector3(3 * 6, -1.8, 3 * 6)));
 	water.push_back(AddWaterCubeToWorld(Vector3(2 * 6, -1.8, 3 * 6)));
@@ -484,9 +489,10 @@ void TutorialGame::InitWorld() {
 	AddFloorToWorld(Vector3(0, -4, 0));
 
 	DrawBaseLine();
-
 	StateMachineTest();
-
+	ServerWorking();
+	ClientWorking();
+	BridgeConstraintTest();
 }
 
 //From here on it's functions to add in objects to the world!
@@ -904,7 +910,9 @@ void TutorialGame::GrabApple() {
 			std::cout << "Collision between " << (spawn)->GetName() << " and " << (goose)->GetName() << std::endl;
 			(*i)->appleState = 3;//collected
 			Vector3 tempVec3 = spawn->GetTransform().GetWorldPosition();
-			(*i)->GetTransform().SetWorldPosition(Vector3(tempVec3.x, tempVec3.y + 20, tempVec3.z));
+			//(*i)->GetTransform().SetWorldPosition(Vector3(tempVec3.x, tempVec3.y + 20, tempVec3.z));
+			(*i)->GetTransform().SetWorldPosition(Vector3(0,0,0));
+
 			score++;
 		}
 		if ((*i)->appleState==2&&!gooseAndspawn){
@@ -1113,10 +1121,48 @@ void TutorialGame::TimeCounting(float dt) {
 }
 
 void TutorialGame::ServerWorking() {
+	NetworkBase::Initialise();
+	receiver1 = new PacketRecTest("server") ;
+	int port = NetworkBase::GetDefaultPort();
 
+	server = new GameServer(port, 1);
+	server->RegisterPacketHandler(String_Message, receiver1);
+	server->RegisterPacketHandler(Time_Message, receiver1);
+	client = nullptr;
+	
+	stringPacket = new GamePacket(String_Message);
+	timePacket = new GamePacket(Time_Message);
 }
 
 void TutorialGame::ClientWorking() {
+	receiver2 = new PacketRecTest("client");
 
+	client = new GameClient();
+	int port = NetworkBase::GetDefaultPort();
+	client->RegisterPacketHandler(String_Message, receiver2);
+	client->RegisterPacketHandler(Time_Message, receiver2);
+	bool connected = client->Connect(127, 0, 0, 1, port);
+	if (!connected){
+		client = nullptr;
+	}
+	stringPacket = new GamePacket(String_Message);
+	timePacket = new GamePacket(Time_Message);
 }
 
+void  TutorialGame::UpdatePacketServer() {
+	server->SendGlobalPacket(StringPacket(receiver1->GetName() + "Full Score:" + std::to_string(apple.size() + 2)+ "Current Score:" +std::to_string(score)));
+	int temptime = (totalTime);
+	server->SendGlobalPacket(TimePacket(temptime));
+
+	server->UpdateServer();
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+}
+
+void  TutorialGame::UpdatePacketClient() {
+	client->SendPacket(StringPacket(receiver2->GetName() + "Full Score:" + std::to_string(apple.size() + 2)));
+	int temptime = (totalTime);
+	client->SendPacket(TimePacket(temptime));
+
+	client->UpdateClient();
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+}
